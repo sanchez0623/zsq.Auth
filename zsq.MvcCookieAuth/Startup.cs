@@ -27,7 +27,12 @@ namespace zsq.MvcCookieAuth
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-                    .AddCookie();
+                    //.AddCookie();
+                    //未登陆的话，自动跳转到/Account/MakeLogin，默认为/Account/Login
+                    .AddCookie(options =>
+                    {
+                        options.LoginPath = "/Account/MakeLogin";
+                    });
 
             services.Configure<CookiePolicyOptions>(options =>
             {
