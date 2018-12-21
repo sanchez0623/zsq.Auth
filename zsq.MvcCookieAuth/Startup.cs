@@ -11,6 +11,10 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.EntityFrameworkCore;
+using zsq.MvcCookieAuth.Data;
+using Microsoft.AspNetCore.Identity;
+using zsq.MvcCookieAuth.Models;
 
 namespace zsq.MvcCookieAuth
 {
@@ -26,12 +30,29 @@ namespace zsq.MvcCookieAuth
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddDbContext<ApplicationDbContext>(options =>
+            {
+                options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection"));
+            });
+
+            services.AddIdentity<ApplicationUser, ApplicationUserRole>()
+                .AddEntityFrameworkStores<ApplicationDbContext>()
+                .AddDefaultTokenProviders();
+
+            services.Configure<IdentityOptions>(options =>
+            {
+                options.Password.RequireLowercase = false;
+                options.Password.RequireNonAlphanumeric = false;
+                options.Password.RequireUppercase = false;
+                //options.Password.RequiredLength = 12;
+            });
+
+
             services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
                     //.AddCookie();
-                    //未登陆的话，自动跳转到/Account/MakeLogin，默认为/Account/Login
                     .AddCookie(options =>
                     {
-                        options.LoginPath = "/Account/MakeLogin";
+                        options.LoginPath = "/Account/Login";
                     });
 
             services.Configure<CookiePolicyOptions>(options =>

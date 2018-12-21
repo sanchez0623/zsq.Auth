@@ -1,20 +1,22 @@
+using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace zsq.MvcCookieAuth.ViewModels
 {
-    public class RegisterViewModel
+    public class LoginViewModel
     {
+
         [Required]
         [DataType(DataType.EmailAddress)]
-        //public string UserName{get;set;}
         public string Email { get; set; }
 
         [Required]
         [DataType(DataType.Password)]
-        public string Password { get; set; }
+        public string Password { get; set; } 
 
-        [Required]
-        [DataType(DataType.Password)]
-        public string ConfirmedPassword { get; set; }
+        public bool RememberMe { get; set; }
     }
 }
