@@ -44,9 +44,8 @@ namespace zsq.MvcCookieAuth
                 options.Password.RequireLowercase = false;
                 options.Password.RequireNonAlphanumeric = false;
                 options.Password.RequireUppercase = false;
-                //options.Password.RequiredLength = 12;
+                options.Password.RequiredLength = 6;
             });
-
 
             services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
                     //.AddCookie();

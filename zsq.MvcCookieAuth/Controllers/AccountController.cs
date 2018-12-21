@@ -25,8 +25,9 @@ namespace zsq.MvcCookieAuth.Controllers
             _signInManager = signInManager;
         }
 
-        public IActionResult Register()
+        public IActionResult Register(string returnUrl = null)
         {
+            ViewData["ReturnUrl"] = returnUrl;
             return View();
         }
 
@@ -76,30 +77,56 @@ namespace zsq.MvcCookieAuth.Controllers
             }
         }
 
-        public IActionResult Login()
+        public IActionResult Login(string returnUrl = null)
         {
+            ViewData["ReturnUrl"] = returnUrl;
             return View();
         }
 
-        public IActionResult MakeLogin()
+        [HttpPost]
+        public async Task<IActionResult> Login(LoginViewModel loginViewModel, string returnUrl)
         {
-            var claims = new List<Claim>
+            if (ModelState.IsValid)
             {
-                new Claim(ClaimTypes.Name,"sanchez"),
-                new Claim(ClaimTypes.Role,"admin")
-            };
-            var claimIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+                ViewData["ReturnUrl"] = returnUrl;
+                var user = await _userManager.FindByEmailAsync(loginViewModel.Email);
+                if (user == null)
+                {
+                    ModelState.AddModelError(nameof(loginViewModel.Email), "Email not exists");
+                }
+                else
+                {
+                    if (await _userManager.CheckPasswordAsync(user, loginViewModel.Password))
+                    //if (_users.ValidateCredentials(loginViewModel.UserName, loginViewModel.Password))
+                    {
+                        AuthenticationProperties props = null;
+                        if (loginViewModel.RememberMe)
+                        {
+                            props = new AuthenticationProperties
+                            {
+                                IsPersistent = true,
+                                ExpiresUtc = DateTimeOffset.UtcNow.Add(TimeSpan.FromMinutes(30))
+                            };
+                        }
 
-            HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(claimIdentity));
+                        //await Microsoft.AspNetCore.Http.AuthenticationManagerExtensions.SignInAsync(HttpContext, user.SubjectId, user.Username, props);
+                        //return RedirectToLoacl(returnUrl);
+                        await _signInManager.SignInAsync(user, props);
 
-            return Ok();
+                        return Redirect("~/");
+                    }
+
+                    ModelState.AddModelError(nameof(loginViewModel.Password), "Wrong Password");
+                }
+            }
+
+            return View(loginViewModel);
         }
 
-        public IActionResult Logout()
+        public async Task<IActionResult> Logout()
         {
-            HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-
-            return Ok();
+            await _signInManager.SignOutAsync();
+            return RedirectToAction("Index", "Home");
         }
     }
 }
