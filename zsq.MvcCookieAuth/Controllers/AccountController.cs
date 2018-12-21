@@ -18,7 +18,6 @@ namespace zsq.MvcCookieAuth.Controllers
     {
         private UserManager<ApplicationUser> _userManager;
         private SignInManager<ApplicationUser> _signInManager;
-        //private IIdentityServerInteractionService _interactionService;
 
         public AccountController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager)
         {
@@ -98,7 +97,6 @@ namespace zsq.MvcCookieAuth.Controllers
                 else
                 {
                     if (await _userManager.CheckPasswordAsync(user, loginViewModel.Password))
-                    //if (_users.ValidateCredentials(loginViewModel.UserName, loginViewModel.Password))
                     {
                         AuthenticationProperties props = null;
                         if (loginViewModel.RememberMe)
@@ -110,15 +108,8 @@ namespace zsq.MvcCookieAuth.Controllers
                             };
                         }
 
-                        //await Microsoft.AspNetCore.Http.AuthenticationManagerExtensions.SignInAsync(HttpContext, user.SubjectId, user.Username, props);
-                        //return RedirectToLoacl(returnUrl);
                         await _signInManager.SignInAsync(user, props);
-                        // if (_interactionService.IsValidReturnUrl(returnUrl))
-                        // {
-                        //     return Redirect(returnUrl);
-                        // }
                         return RedirectToLoacl(returnUrl);
-                        //return Redirect("~/");
                     }
 
                     ModelState.AddModelError(nameof(loginViewModel.Password), "Wrong Password");
