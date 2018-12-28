@@ -27,7 +27,8 @@ namespace zsq.MvcCookieAuth
                     AllowedScopes=
                     {
                         IdentityServerConstants.StandardScopes.Profile,
-                        IdentityServerConstants.StandardScopes.OpenId
+                        IdentityServerConstants.StandardScopes.OpenId,
+                        IdentityServerConstants.StandardScopes.Email
                     },
                     RequireConsent=false,
                     RedirectUris={"http://localhost:5003/signin-oidc"},
