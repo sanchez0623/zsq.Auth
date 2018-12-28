@@ -10,14 +10,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.EntityFrameworkCore;
-using zsq.MvcCookieAuth.Data;
-using Microsoft.AspNetCore.Identity;
-using zsq.MvcCookieAuth.Models;
-using IdentityServer4;
 
-namespace zsq.MvcCookieAuth
+namespace zsq.OidcClient
 {
     public class Startup
     {
@@ -31,18 +25,27 @@ namespace zsq.MvcCookieAuth
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddIdentityServer()
-                .AddDeveloperSigningCredential()
-                .AddInMemoryApiResources(IdentityServerConfig.GetResources())
-                .AddInMemoryIdentityResources(IdentityServerConfig.GetIdentityResource())
-                .AddInMemoryClients(IdentityServerConfig.GetClients())
-                .AddTestUsers(IdentityServerConfig.GetTestUsers());
-
             services.Configure<CookiePolicyOptions>(options =>
             {
                 // This lambda determines whether user consent for non-essential cookies is needed for a given request.
                 options.CheckConsentNeeded = context => true;
                 options.MinimumSameSitePolicy = SameSiteMode.None;
+            });
+
+            services.AddAuthentication(options =>
+            {
+                options.DefaultScheme = "Cookies";
+                options.DefaultChallengeScheme = "oidc";
+            })
+            .AddCookie("Cookies")
+            .AddOpenIdConnect("oidc", options =>
+            {
+                options.SignInScheme = "Cookies";
+                options.Authority = "http://localhost:5002";
+                options.RequireHttpsMetadata = false;
+                options.ClientId = "mvc";
+                options.ClientSecret = "secret";
+                options.SaveTokens = true;
             });
 
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
@@ -65,7 +68,7 @@ namespace zsq.MvcCookieAuth
             app.UseStaticFiles();
             app.UseCookiePolicy();
 
-            app.UseIdentityServer();
+            app.UseAuthentication();
 
             app.UseMvc(routes =>
             {

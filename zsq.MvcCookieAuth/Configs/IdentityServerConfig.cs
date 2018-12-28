@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using IdentityServer4;
 using IdentityServer4.Models;
 using IdentityServer4.Test;
 
@@ -23,14 +24,22 @@ namespace zsq.MvcCookieAuth
                     ClientId="mvc",
                     AllowedGrantTypes= { GrantType.Implicit},
                     ClientSecrets={ new Secret("secret".Sha256())},
-                    AllowedScopes={"api"}//这个client允许访问的apiResource（对应apiResource的名称）
+                    AllowedScopes=
+                    {
+                        IdentityServerConstants.StandardScopes.Profile,
+                        IdentityServerConstants.StandardScopes.OpenId
+                    },
+                    RequireConsent=false,
+                    RedirectUris={"http://localhost:5003/signin-oidc"},
+                    PostLogoutRedirectUris={"http://localhost:5003/signout-callback-oidc"}
                 }
             };
         }
 
         public static List<TestUser> GetTestUsers()
         {
-            return new List<TestUser>{
+            return new List<TestUser>
+            {
                 new TestUser
                 {
                     SubjectId="1",

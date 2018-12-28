@@ -17,10 +17,10 @@ namespace zsq.MvcCookieAuth
         {
             CreateWebHostBuilder(args)
                 .Build()
-                .MigrateDbContext<ApplicationDbContext>((context, services) =>
-                {
-                    new ApplicationDbContextSeed().SeedAsync(context, services).Wait();
-                })
+                // .MigrateDbContext<ApplicationDbContext>((context, services) =>
+                // {
+                //     new ApplicationDbContextSeed().SeedAsync(context, services).Wait();
+                // })
                 .Run();
         }
 
