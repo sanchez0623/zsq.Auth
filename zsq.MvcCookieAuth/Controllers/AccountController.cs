@@ -17,20 +17,12 @@ namespace zsq.MvcCookieAuth.Controllers
 {
     public class AccountController : Controller
     {
-        // private UserManager<ApplicationUser> _userManager;
-        // private SignInManager<ApplicationUser> _signInManager;
         private readonly TestUserStore _users;
 
         public AccountController(TestUserStore users)
         {
             _users = users;
         }
-
-        // public AccountController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager)
-        // {
-        //     _userManager = userManager;
-        //     _signInManager = signInManager;
-        // }
 
         public IActionResult Register(string returnUrl = null)
         {
