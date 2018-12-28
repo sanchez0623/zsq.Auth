@@ -15,6 +15,7 @@ using Microsoft.EntityFrameworkCore;
 using zsq.MvcCookieAuth.Data;
 using Microsoft.AspNetCore.Identity;
 using zsq.MvcCookieAuth.Models;
+using IdentityServer4;
 
 namespace zsq.MvcCookieAuth
 {
@@ -30,29 +31,36 @@ namespace zsq.MvcCookieAuth
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddDbContext<ApplicationDbContext>(options =>
-            {
-                options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection"));
-            });
+            services.AddIdentityServer()
+                .AddDeveloperSigningCredential()
+                .AddInMemoryApiResources(IdentityServerConfig.GetResources())
+                .AddInMemoryIdentityResources(IdentityServerConfig.GetIdentityResource())
+                .AddInMemoryClients(IdentityServerConfig.GetClients())
+                .AddTestUsers(IdentityServerConfig.GetTestUsers());
 
-            services.AddIdentity<ApplicationUser, ApplicationUserRole>()
-                .AddEntityFrameworkStores<ApplicationDbContext>()
-                .AddDefaultTokenProviders();
+            // services.AddDbContext<ApplicationDbContext>(options =>
+            // {
+            //     options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection"));
+            // });
 
-            services.Configure<IdentityOptions>(options =>
-            {
-                options.Password.RequireLowercase = false;
-                options.Password.RequireNonAlphanumeric = false;
-                options.Password.RequireUppercase = false;
-                options.Password.RequiredLength = 6;
-            });
+            // services.AddIdentity<ApplicationUser, ApplicationUserRole>()
+            //     .AddEntityFrameworkStores<ApplicationDbContext>()
+            //     .AddDefaultTokenProviders();
 
-            services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-                    //.AddCookie();
-                    .AddCookie(options =>
-                    {
-                        options.LoginPath = "/Account/Login";
-                    });
+            // services.Configure<IdentityOptions>(options =>
+            // {
+            //     options.Password.RequireLowercase = false;
+            //     options.Password.RequireNonAlphanumeric = false;
+            //     options.Password.RequireUppercase = false;
+            //     options.Password.RequiredLength = 6;
+            // });
+
+            // services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+            //         //.AddCookie();
+            //         .AddCookie(options =>
+            //         {
+            //             options.LoginPath = "/Account/Login";
+            //         });
 
             services.Configure<CookiePolicyOptions>(options =>
             {
@@ -80,8 +88,10 @@ namespace zsq.MvcCookieAuth
 
             app.UseHttpsRedirection();
             app.UseStaticFiles();
-            app.UseAuthentication();
+            //app.UseAuthentication();
             app.UseCookiePolicy();
+
+            app.UseIdentityServer();
 
             app.UseMvc(routes =>
             {
