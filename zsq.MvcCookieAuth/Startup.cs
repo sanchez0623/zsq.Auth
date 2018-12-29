@@ -16,6 +16,7 @@ using zsq.MvcCookieAuth.Data;
 using Microsoft.AspNetCore.Identity;
 using zsq.MvcCookieAuth.Models;
 using IdentityServer4;
+using zsq.MvcCookieAuth.Services;
 
 namespace zsq.MvcCookieAuth
 {
@@ -44,6 +45,8 @@ namespace zsq.MvcCookieAuth
                 options.CheckConsentNeeded = context => true;
                 options.MinimumSameSitePolicy = SameSiteMode.None;
             });
+
+            services.AddScoped<ConsentService>();
 
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
         }
