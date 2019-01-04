@@ -5,7 +5,7 @@ namespace zsq.MvcCookieAuth.ViewModels
     public class RegisterViewModel
     {
         [Required]
-        public string UserName { get; set; }
+        public string Email { get; set; }
 
         [Required]
         [DataType(DataType.Password)]

@@ -12,16 +12,22 @@ using System.Security.Claims;
 using zsq.MvcCookieAuth.ViewModels;
 using Microsoft.AspNetCore.Identity;
 using IdentityServer4.Test;
+using IdentityServer4.Services;
 
 namespace zsq.MvcCookieAuth.Controllers
 {
     public class AccountController : Controller
     {
-        private readonly TestUserStore _users;
+        private UserManager<ApplicationUser> _userManager;
+        private SignInManager<ApplicationUser> _signInManager;
+        private IIdentityServerInteractionService _interaction;
 
-        public AccountController(TestUserStore users)
+        public AccountController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager,
+            IIdentityServerInteractionService interaction)
         {
-            _users = users;
+            _userManager = userManager;
+            _signInManager = signInManager;
+            _interaction = interaction;
         }
 
         public IActionResult Register(string returnUrl = null)
@@ -33,27 +39,27 @@ namespace zsq.MvcCookieAuth.Controllers
         [HttpPost]
         public async Task<IActionResult> Register(RegisterViewModel registerViewModel, string returnUrl = null)
         {
-            // if (ModelState.IsValid)
-            // {
-            //     ViewData["ReturnUrl"] = returnUrl;
-            //     var identityUser = new ApplicationUser
-            //     {
-            //         Email = registerViewModel.Email,
-            //         UserName = registerViewModel.Email,
-            //         NormalizedUserName = registerViewModel.Email,
-            //     };
+            if (ModelState.IsValid)
+            {
+                ViewData["ReturnUrl"] = returnUrl;
+                var identityUser = new ApplicationUser
+                {
+                    Email = registerViewModel.Email,
+                    UserName = registerViewModel.Email,
+                    NormalizedUserName = registerViewModel.Email,
+                };
 
-            //     var identityResult = await _userManager.CreateAsync(identityUser, registerViewModel.Password);
-            //     if (identityResult.Succeeded)
-            //     {
-            //         await _signInManager.SignInAsync(identityUser, new AuthenticationProperties { IsPersistent = true });
-            //         return RedirectToLoacl(returnUrl);
-            //     }
-            //     else
-            //     {
-            //         AddErrors(identityResult);
-            //     }
-            // }
+                var identityResult = await _userManager.CreateAsync(identityUser, registerViewModel.Password);
+                if (identityResult.Succeeded)
+                {
+                    await _signInManager.SignInAsync(identityUser, new AuthenticationProperties { IsPersistent = true });
+                    return RedirectToLoacl(returnUrl);
+                }
+                else
+                {
+                    AddErrors(identityResult);
+                }
+            }
 
             return View();
         }
@@ -88,14 +94,14 @@ namespace zsq.MvcCookieAuth.Controllers
             if (ModelState.IsValid)
             {
                 ViewData["ReturnUrl"] = returnUrl;
-                var user = _users.FindByUsername(loginViewModel.UserName);
+                var user = await _userManager.FindByEmailAsync(loginViewModel.Email);
                 if (user == null)
                 {
-                    ModelState.AddModelError(nameof(loginViewModel.UserName), "Email not exists");
+                    ModelState.AddModelError(nameof(loginViewModel.Email), "Email not exists");
                 }
                 else
                 {
-                    if (_users.ValidateCredentials(loginViewModel.UserName, loginViewModel.Password))
+                    if (await _userManager.CheckPasswordAsync(user, loginViewModel.Password))
                     {
                         AuthenticationProperties props = null;
                         if (loginViewModel.RememberMe)
@@ -107,9 +113,16 @@ namespace zsq.MvcCookieAuth.Controllers
                             };
                         }
 
-                        await Microsoft.AspNetCore.Http.AuthenticationManagerExtensions.SignInAsync(
-                            HttpContext, user.SubjectId, user.Username, props);
-                        return RedirectToLoacl(returnUrl);
+                        // await Microsoft.AspNetCore.Http.AuthenticationManagerExtensions.SignInAsync(
+                        //     HttpContext, user.SubjectId, user.Username, props);
+
+                        await _signInManager.SignInAsync(user, props);
+                        if (_interaction.IsValidReturnUrl(returnUrl))
+                        {
+                            return RedirectToLoacl(returnUrl);
+                        }
+
+                        return RedirectToLoacl("~/");
                     }
 
                     ModelState.AddModelError(nameof(loginViewModel.Password), "Wrong Password");
@@ -121,7 +134,7 @@ namespace zsq.MvcCookieAuth.Controllers
 
         public async Task<IActionResult> Logout()
         {
-            await HttpContext.SignOutAsync();
+            await _signInManager.SignOutAsync();
             return RedirectToAction("Index", "Home");
         }
     }
