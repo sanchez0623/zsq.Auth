@@ -6,5 +6,6 @@
     <PackageReference Include="Microsoft.AspNetCore.App"/>
     <PackageReference Include="Microsoft.AspNetCore.Razor.Design" Version="2.1.2" PrivateAssets="All"/>
     <PackageReference Include="IdentityServer4" Version="2.3.2"/>
+    <PackageReference Include="IdentityServer4.AspNetIdentity" Version="2.3.0"/>
   </ItemGroup>
 </Project>

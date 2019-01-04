@@ -32,12 +32,22 @@ namespace zsq.MvcCookieAuth
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddDbContext<ApplicationDbContext>(options =>
+            {
+                options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection"));
+            });
+
+            services.AddIdentity<ApplicationUser, ApplicationUserRole>()
+                .AddEntityFrameworkStores<ApplicationDbContext>()
+                .AddDefaultTokenProviders();
+
             services.AddIdentityServer()
                 .AddDeveloperSigningCredential()
                 .AddInMemoryApiResources(IdentityServerConfig.GetResources())
                 .AddInMemoryIdentityResources(IdentityServerConfig.GetIdentityResource())
                 .AddInMemoryClients(IdentityServerConfig.GetClients())
-                .AddTestUsers(IdentityServerConfig.GetTestUsers());
+                .AddAspNetIdentity<ApplicationUser>();
+                //.AddTestUsers(IdentityServerConfig.GetTestUsers())
 
             services.Configure<CookiePolicyOptions>(options =>
             {
