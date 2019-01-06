@@ -17,6 +17,7 @@ using Microsoft.AspNetCore.Identity;
 using zsq.MvcCookieAuth.Models;
 using IdentityServer4;
 using zsq.MvcCookieAuth.Services;
+using IdentityServer4.Services;
 
 namespace zsq.MvcCookieAuth
 {
@@ -46,8 +47,16 @@ namespace zsq.MvcCookieAuth
                 .AddInMemoryApiResources(IdentityServerConfig.GetResources())
                 .AddInMemoryIdentityResources(IdentityServerConfig.GetIdentityResource())
                 .AddInMemoryClients(IdentityServerConfig.GetClients())
-                .AddAspNetIdentity<ApplicationUser>();
-                //.AddTestUsers(IdentityServerConfig.GetTestUsers())
+                .AddAspNetIdentity<ApplicationUser>()
+                .Services.AddScoped<IProfileService, ProfileService>();
+
+            services.Configure<IdentityOptions>(options =>
+            {
+                options.Password.RequireLowercase = false;
+                options.Password.RequireNonAlphanumeric = false;
+                options.Password.RequireUppercase = false;
+                options.Password.RequiredLength = 6;
+            });
 
             services.Configure<CookiePolicyOptions>(options =>
             {

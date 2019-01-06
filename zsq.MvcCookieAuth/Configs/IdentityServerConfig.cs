@@ -36,7 +36,10 @@ namespace zsq.MvcCookieAuth
                     },
                     RequireConsent=true,
                     RedirectUris={"http://localhost:5003/signin-oidc"},
-                    PostLogoutRedirectUris={"http://localhost:5003/signout-callback-oidc"}
+                    PostLogoutRedirectUris={"http://localhost:5003/signout-callback-oidc"},
+                    AllowOfflineAccess=true,
+                    AllowAccessTokensViaBrowser=true,
+                    AlwaysIncludeUserClaimsInIdToken=true//为啥我不设置为true，客户端就能获取到userinfo！！！？？
                 }
             };
         }
