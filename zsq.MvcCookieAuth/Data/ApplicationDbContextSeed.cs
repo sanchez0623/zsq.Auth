@@ -37,7 +37,7 @@ namespace zsq.MvcCookieAuth.Data
 
                 var defaultUser = new ApplicationUser
                 {
-                    UserName = "Administrator",
+                    UserName = "Admin",
                     Email = "18576645357@163.com",
                     NormalizedUserName = "admin",
                     Avatar = "https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1526955882826&di=d53ce0d491bf61a180194fd358641f81&imgtype=0&src=http%3A%2F%2Fimg.mukewang.com%2F5a77b61000013ca502560192.jpg"

@@ -26,7 +26,7 @@ namespace zsq.MvcCookieAuth
                     ClientName="Mvc",
                     ClientUri="http://localhost:5003",
                     LogoUri="https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1526955882826&di=d53ce0d491bf61a180194fd358641f81&imgtype=0&src=http%3A%2F%2Fimg.mukewang.com%2F5a77b61000013ca502560192.jpg",
-                    AllowedGrantTypes= { GrantType.Implicit},
+                    AllowedGrantTypes= { GrantType.Hybrid},//需要设置为Hybrid，client才能使用额外的userinfo
                     ClientSecrets={ new Secret("secret".Sha256())},
                     AllowedScopes=
                     {
@@ -39,7 +39,7 @@ namespace zsq.MvcCookieAuth
                     PostLogoutRedirectUris={"http://localhost:5003/signout-callback-oidc"},
                     AllowOfflineAccess=true,
                     AllowAccessTokensViaBrowser=true,
-                    AlwaysIncludeUserClaimsInIdToken=true//为啥我不设置为true，客户端就能获取到userinfo！！！？？
+                    // AlwaysIncludeUserClaimsInIdToken=true
                 }
             };
         }

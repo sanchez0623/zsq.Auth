@@ -49,9 +49,9 @@ namespace zsq.OidcClient
                 options.SaveTokens = true;
 
                 // 设为true会获取到所有信息
-                // options.GetClaimsFromUserInfoEndpoint = true;
+                options.GetClaimsFromUserInfoEndpoint = true;
 
-                // 以下设置均为报异常
+                // 以下设置均为报异常————已找到原因：未把服务的的AllowedGrantTypes设置为GrantType.Hybrid
                 /*
                     Error.
                     An error occurred while processing your request.
@@ -65,16 +65,16 @@ namespace zsq.OidcClient
                     For local debugging, 
                     development environment can be enabled by setting the ASPNETCORE_ENVIRONMENT environment variable to Development, and restarting the application.
                  */
-                // options.ResponseType = OpenIdConnectResponseType.CodeIdToken;
+                options.ResponseType = OpenIdConnectResponseType.CodeIdTokenToken;
 
-                // options.ClaimActions.MapJsonKey("sub", "sub");
-                // options.ClaimActions.MapJsonKey("preferred_username", "preferred_username");
-                // options.ClaimActions.MapJsonKey("avatar", "avatar");
-                // options.ClaimActions.MapCustomJson("sub", j => j["role"].ToString());
+                options.ClaimActions.MapJsonKey("sub", "sub");
+                options.ClaimActions.MapJsonKey("preferred_username", "preferred_username");
+                options.ClaimActions.MapJsonKey("avatar", "avatar");
+                options.ClaimActions.MapCustomJson("sub", j => j["role"].ToString());
 
-                // options.Scope.Add("openid");
-                // options.Scope.Add("profile");
-                // options.Scope.Add("offline_access");
+                options.Scope.Add("openid");
+                options.Scope.Add("profile");
+                options.Scope.Add("offline_access");
             });
 
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
