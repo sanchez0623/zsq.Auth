@@ -18,6 +18,10 @@ using zsq.MvcCookieAuth.Models;
 using IdentityServer4;
 using zsq.MvcCookieAuth.Services;
 using IdentityServer4.Services;
+using IdentityServer4.EntityFramework;
+using System.Reflection;
+using IdentityServer4.EntityFramework.DbContexts;
+using IdentityServer4.EntityFramework.Mappers;
 
 namespace zsq.MvcCookieAuth
 {
@@ -33,6 +37,9 @@ namespace zsq.MvcCookieAuth
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            const string connectionString = @"Data Source=(LocalDb)\MSSQLLocalDB;database=IdentityServer4.EntityFramework-2.0.0;trusted_connection=yes;";
+            var migrationAssembly = typeof(Startup).GetTypeInfo().Assembly.GetName().Name;
+
             services.AddDbContext<ApplicationDbContext>(options =>
             {
                 options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection"));
@@ -44,9 +51,20 @@ namespace zsq.MvcCookieAuth
 
             services.AddIdentityServer()
                 .AddDeveloperSigningCredential()
-                .AddInMemoryApiResources(IdentityServerConfig.GetResources())
-                .AddInMemoryIdentityResources(IdentityServerConfig.GetIdentityResource())
-                .AddInMemoryClients(IdentityServerConfig.GetClients())
+                .AddConfigurationStore(options =>
+                {
+                    options.ConfigureDbContext = builder =>
+                    {
+                        builder.UseSqlServer(connectionString, sql => sql.MigrationsAssembly(migrationAssembly));
+                    };
+                })
+                .AddOperationalStore(options =>
+                {
+                    options.ConfigureDbContext = builder =>
+                    {
+                        builder.UseSqlServer(connectionString, sql => sql.MigrationsAssembly(migrationAssembly));
+                    };
+                })
                 .AddAspNetIdentity<ApplicationUser>()
                 .Services.AddScoped<IProfileService, ProfileService>();
 
@@ -83,6 +101,7 @@ namespace zsq.MvcCookieAuth
                 app.UseHsts();
             }
 
+            InitIdentityServerDatabase(app);
             app.UseHttpsRedirection();
             app.UseStaticFiles();
             app.UseCookiePolicy();
@@ -95,6 +114,46 @@ namespace zsq.MvcCookieAuth
                     name: "default",
                     template: "{controller=Home}/{action=Index}/{id?}");
             });
+        }
+
+        public void InitIdentityServerDatabase(IApplicationBuilder app)
+        {
+            using (var scope = app.ApplicationServices.CreateScope())
+            {
+                scope.ServiceProvider.GetRequiredService<PersistedGrantDbContext>().Database.Migrate();
+
+                var configurationDbContext = scope.ServiceProvider.GetRequiredService<ConfigurationDbContext>();
+
+                if (!configurationDbContext.Clients.Any())
+                {
+                    foreach (var client in IdentityServerConfig.GetClients())
+                    {
+                        configurationDbContext.Clients.Add(client.ToEntity());
+                    }
+
+                    configurationDbContext.SaveChanges();
+                }
+
+                if (!configurationDbContext.ApiResources.Any())
+                {
+                    foreach (var apiResource in IdentityServerConfig.GetResources())
+                    {
+                        configurationDbContext.ApiResources.Add(apiResource.ToEntity());
+                    }
+
+                    configurationDbContext.SaveChanges();
+                }
+
+                if (!configurationDbContext.IdentityResources.Any())
+                {
+                    foreach (var identity in IdentityServerConfig.GetIdentityResource())
+                    {
+                        configurationDbContext.IdentityResources.Add(identity.ToEntity());
+                    }
+
+                    configurationDbContext.SaveChanges();
+                }
+            }
         }
     }
 }
